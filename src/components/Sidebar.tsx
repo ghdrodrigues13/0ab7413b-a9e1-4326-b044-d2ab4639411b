@@ -4,7 +4,6 @@ import {
   Users, 
   Upload, 
   Download, 
-  Settings,
   FileText,
   PenTool
 } from 'lucide-react';
@@ -71,7 +70,7 @@ export function Sidebar() {
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
 
   const getLinkClasses = (path: string) => cn(
-    "transition-all duration-200",
+    "transition-all duration-200 w-full flex items-center gap-3",
     isActive(path)
       ? "bg-primary text-primary-foreground shadow-md"
       : "hover:bg-secondary/50 text-foreground"
@@ -104,13 +103,13 @@ export function Sidebar() {
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton className="p-0">
                     <NavLink 
                       to={item.url} 
                       className={getLinkClasses(item.url)}
                       title={collapsed ? item.description : undefined}
                     >
-                      <item.icon className="w-4 h-4" />
+                      <item.icon className="w-4 h-4 flex-shrink-0" />
                       {!collapsed && (
                         <span className="animate-slide-in">{item.title}</span>
                       )}
@@ -131,13 +130,13 @@ export function Sidebar() {
             <SidebarMenu>
               {toolItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton className="p-0">
                     <NavLink 
                       to={item.url} 
                       className={getLinkClasses(item.url)}
                       title={collapsed ? item.description : undefined}
                     >
-                      <item.icon className="w-4 h-4" />
+                      <item.icon className="w-4 h-4 flex-shrink-0" />
                       {!collapsed && (
                         <span className="animate-slide-in">{item.title}</span>
                       )}
