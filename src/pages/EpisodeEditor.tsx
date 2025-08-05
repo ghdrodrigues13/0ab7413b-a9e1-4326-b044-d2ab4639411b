@@ -11,17 +11,21 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Save, ArrowLeft, Users, Target, BookOpen, Zap, FileText } from 'lucide-react';
 import { useLocalStorage, useAutoSave } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
+import { useScriptGeneration } from '@/hooks/useScriptGeneration';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { OpenAIConfig } from '@/components/OpenAIConfig';
 
 export default function EpisodeEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { generateScript: generateAIScript, isGenerating, error } = useScriptGeneration();
   
   const [episodes, setEpisodes] = useLocalStorage<Episode[]>('episodes', []);
   const [characters] = useLocalStorage<Character[]>('characters', defaultCharacters);
   const [episode, setEpisode] = useState<Episode | null>(null);
+  const [generatedScript, setGeneratedScript] = useState<string>('');
 
   // Auto-save episode data
   useAutoSave(`episode-${id}`, episode, 2000);
@@ -102,7 +106,26 @@ export default function EpisodeEditor() {
     });
   };
 
-  const generateScript = () => {
+  const handleGenerateAIScript = async () => {
+    if (!episode) return;
+    
+    try {
+      const script = await generateAIScript(episode, characters);
+      setGeneratedScript(script);
+      toast({
+        title: "Roteiro gerado com sucesso!",
+        description: "A IA criou um roteiro detalhado baseado nas informações fornecidas.",
+      });
+    } catch (err) {
+      toast({
+        title: "Erro ao gerar roteiro",
+        description: error || "Não foi possível gerar o roteiro. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const generateBasicScript = () => {
     if (!episode) return '';
     
     const episodeNumber = episodes.findIndex(ep => ep.id === episode.id) + 1;
@@ -181,6 +204,8 @@ export default function EpisodeEditor() {
         </div>
         
         <div className="flex gap-2">
+          <OpenAIConfig />
+          
           <Button onClick={handleSave} variant="outline">
             <Save className="w-4 h-4 mr-2" />
             Salvar
@@ -188,23 +213,44 @@ export default function EpisodeEditor() {
           
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="secondary">
+              <Button variant="secondary" onClick={() => setGeneratedScript('')}>
                 <FileText className="w-4 h-4 mr-2" />
                 Gerar Roteiro
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh]">
               <DialogHeader>
-                <DialogTitle>Roteiro Gerado</DialogTitle>
+                <DialogTitle>Gerar Roteiro</DialogTitle>
                 <DialogDescription>
-                  Roteiro baseado nas informações preenchidas do episódio
+                  Escolha como gerar o roteiro do episódio
                 </DialogDescription>
               </DialogHeader>
-              <ScrollArea className="h-[60vh] w-full">
-                <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg">
-                  {generateScript()}
-                </pre>
-              </ScrollArea>
+              <div className="space-y-4">
+                <div className="flex gap-2 justify-center">
+                  <Button 
+                    onClick={handleGenerateAIScript} 
+                    disabled={isGenerating}
+                    className="flex-1"
+                  >
+                    {isGenerating ? 'Gerando...' : 'Gerar com IA'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setGeneratedScript(generateBasicScript())}
+                    className="flex-1"
+                  >
+                    Template Básico
+                  </Button>
+                </div>
+                
+                {generatedScript && (
+                  <ScrollArea className="h-[50vh] w-full">
+                    <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg">
+                      {generatedScript}
+                    </pre>
+                  </ScrollArea>
+                )}
+              </div>
             </DialogContent>
           </Dialog>
           
