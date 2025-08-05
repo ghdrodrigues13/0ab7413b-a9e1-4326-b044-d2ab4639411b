@@ -8,9 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Save, ArrowLeft, Users, Target, BookOpen, Zap } from 'lucide-react';
+import { Save, ArrowLeft, Users, Target, BookOpen, Zap, FileText } from 'lucide-react';
 import { useLocalStorage, useAutoSave } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function EpisodeEditor() {
   const { id } = useParams<{ id: string }>();
@@ -100,6 +102,55 @@ export default function EpisodeEditor() {
     });
   };
 
+  const generateScript = () => {
+    if (!episode) return '';
+    
+    const episodeNumber = episodes.findIndex(ep => ep.id === episode.id) + 1;
+    
+    let script = `# Roteiro – Episódio ${episodeNumber}\n\n`;
+    
+    script += `## 1. Dados Gerais\n`;
+    script += `- **Título provisório:** ${episode.title || 'Sem título'}\n`;
+    script += `- **Duração estimada:** até 5 min\n`;
+    script += `- **Objetivos de aprendizagem:**\n`;
+    episode.objectives.forEach(obj => {
+      if (obj.trim()) script += `  - ${obj}\n`;
+    });
+    
+    script += `\n## 2. Personagens em Cena\n`;
+    selectedCharacters.forEach(char => {
+      script += `- **${char.name}** (${char.role}): ${char.description}\n`;
+    });
+    
+    script += `\n## 3. Cenários\n`;
+    script += `- **Internos:** [A definir]\n`;
+    script += `- **Externos:** [A definir]\n`;
+    
+    script += `\n## 4. Estrutura Narrativa\n`;
+    script += `1. **Abertura / Gancho:**\n   ${episode.description || '[A definir]'}\n`;
+    script += `2. **Conflito / Dúvida:**\n   ${episode.conflict || '[A definir]'}\n`;
+    script += `3. **Desenvolvimento:**\n   [A definir]\n`;
+    script += `4. **Síntese & Gancho próximo episódio:**\n   ${episode.cliffhanger || '[A definir]'}\n`;
+    
+    script += `\n## 5. Diálogo (quando houver)\n`;
+    script += `### Cena 1\n`;
+    script += `- **[Personagem]:** "[Diálogo a definir]"\n`;
+    
+    script += `\n## 6. Descrição da Cena\n`;
+    script += `- **Cena 1:** [Descrição a definir]\n`;
+    
+    script += `\n## 7. Descrição da Animação\n`;
+    script += `- **Cena 1:** enquadramento: [A definir]; movimento de câmera: [A definir]\n`;
+    
+    script += `\n## 8. B-roll (quando houver)\n`;
+    script += `- **Cena 1:** [Descrição a definir]\n`;
+    
+    script += `\n## 9. Resultado de Aprendizagem\n`;
+    script += `${episode.learningOutcome || '[A definir]'}\n`;
+    
+    return script;
+  };
+
   if (!episode) {
     return <div>Carregando...</div>;
   }
@@ -134,6 +185,29 @@ export default function EpisodeEditor() {
             <Save className="w-4 h-4 mr-2" />
             Salvar
           </Button>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="secondary">
+                <FileText className="w-4 h-4 mr-2" />
+                Gerar Roteiro
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[80vh]">
+              <DialogHeader>
+                <DialogTitle>Roteiro Gerado</DialogTitle>
+                <DialogDescription>
+                  Roteiro baseado nas informações preenchidas do episódio
+                </DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="h-[60vh] w-full">
+                <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg">
+                  {generateScript()}
+                </pre>
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+          
           {episode.status === 'draft' && (
             <Button onClick={markAsCompleted} className="shadow-creative">
               <BookOpen className="w-4 h-4 mr-2" />
