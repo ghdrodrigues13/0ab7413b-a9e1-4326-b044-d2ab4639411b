@@ -26,7 +26,7 @@ export function useScriptGeneration() {
         cliffhanger: episode.cliffhanger,
       };
 
-      const response = await fetch('/functions/v1/generate-script', {
+      const response = await fetch('https://0ab7413b-a9e1-4326-b044-d2ab4639411b.supabase.co/functions/v1/generate-script', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
