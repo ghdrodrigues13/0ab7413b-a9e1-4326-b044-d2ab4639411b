@@ -112,6 +112,7 @@ export default function EpisodeEditor() {
     try {
       const script = await generateAIScript(episode, characters);
       setGeneratedScript(script);
+      updateEpisode('script', script);
       toast({
         title: "Roteiro gerado com sucesso!",
         description: "A IA criou um roteiro detalhado baseado nas informações fornecidas.",
@@ -123,6 +124,16 @@ export default function EpisodeEditor() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleSaveScript = () => {
+    if (!episode || !generatedScript) return;
+    updateEpisode('script', generatedScript);
+    handleSave();
+    toast({
+      title: "Roteiro salvo",
+      description: "O roteiro foi salvo no episódio com sucesso.",
+    });
   };
 
   const generateBasicScript = () => {
@@ -213,7 +224,7 @@ export default function EpisodeEditor() {
           
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="secondary" onClick={() => setGeneratedScript('')}>
+              <Button variant="secondary" onClick={() => setGeneratedScript(episode.script || '')}>
                 <FileText className="w-4 h-4 mr-2" />
                 Gerar Roteiro
               </Button>
@@ -244,11 +255,17 @@ export default function EpisodeEditor() {
                 </div>
                 
                 {generatedScript && (
-                  <ScrollArea className="h-[50vh] w-full">
-                    <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg">
-                      {generatedScript}
-                    </pre>
-                  </ScrollArea>
+                  <div className="space-y-4">
+                    <ScrollArea className="h-[50vh] w-full">
+                      <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg">
+                        {generatedScript}
+                      </pre>
+                    </ScrollArea>
+                    <Button onClick={handleSaveScript} className="w-full">
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Roteiro
+                    </Button>
+                  </div>
                 )}
               </div>
             </DialogContent>
@@ -386,6 +403,57 @@ export default function EpisodeEditor() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Generated Script */}
+          {episode.script && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Roteiro Gerado
+                </CardTitle>
+                <CardDescription>
+                  Roteiro criado automaticamente baseado nas informações do episódio
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-96 w-full">
+                  <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg">
+                    {episode.script}
+                  </pre>
+                </ScrollArea>
+                <div className="flex gap-2 mt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(episode.script || '');
+                      toast({
+                        title: "Roteiro copiado",
+                        description: "O roteiro foi copiado para a área de transferência.",
+                      });
+                    }}
+                    className="flex-1"
+                  >
+                    Copiar Roteiro
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      updateEpisode('script', undefined);
+                      handleSave();
+                      toast({
+                        title: "Roteiro removido",
+                        description: "O roteiro foi removido do episódio.",
+                      });
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Remover
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}

@@ -19,6 +19,7 @@ export interface Episode {
   conflict: string;
   learningOutcome: string;
   cliffhanger: string;
+  script?: string; // generated script content
   status: 'draft' | 'completed';
   createdAt: Date;
   updatedAt: Date;
