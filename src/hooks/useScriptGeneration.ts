@@ -30,6 +30,7 @@ export function useScriptGeneration() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiYXl6Y2FqZ2V3ZHV4dmp5d2FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1MzU3MTksImV4cCI6MjA2OTExMTcxOX0.ohtEoFiwtJt6zFGDyFZvQ9n3ZlIKZT3RhP7kUeOyMGo'}`,
         },
         body: JSON.stringify({ episodeData }),
       });
